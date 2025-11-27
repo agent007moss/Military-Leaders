@@ -1,0 +1,26 @@
+{
+  "description": "Global dashboard master layout template (placeholder).",
+  "version": 1,
+  "boxes": {
+    "appointments": {
+      "metrics": [],
+      "locked": false
+    },
+    "physical_fitness": {
+      "metrics": [],
+      "locked": false
+    },
+    "weapons": {
+      "metrics": [],
+      "locked": false
+    },
+    "medpros": {
+      "metrics": [],
+      "locked": false
+    },
+    "tasks": {
+      "metrics": [],
+      "locked": false
+    }
+  }
+}

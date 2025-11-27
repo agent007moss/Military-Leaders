@@ -1,0 +1,8 @@
+{
+  "module": "counseling",
+  "branch": "coast_guard",
+  "key": "counseling_types",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

@@ -1,0 +1,8 @@
+{
+  "module": "weapons",
+  "branch": "coast_guard",
+  "key": "weapon_types",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

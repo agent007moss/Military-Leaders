@@ -1,0 +1,8 @@
+{
+  "module": "hand_receipt",
+  "branch": "air_force",
+  "key": "items",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

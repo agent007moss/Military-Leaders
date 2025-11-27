@@ -1,0 +1,8 @@
+{
+  "module": "evaluations",
+  "branch": "army",
+  "key": "evaluation_types",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

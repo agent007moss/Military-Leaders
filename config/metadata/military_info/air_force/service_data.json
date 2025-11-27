@@ -1,0 +1,8 @@
+{
+  "module": "military_info",
+  "branch": "air_force",
+  "key": "service_data",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

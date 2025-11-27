@@ -1,0 +1,8 @@
+{
+  "module": "weapons",
+  "branch": "navy",
+  "key": "top_weapons",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

@@ -1,0 +1,8 @@
+{
+  "module": "family",
+  "branch": "coast_guard",
+  "key": "relationships",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

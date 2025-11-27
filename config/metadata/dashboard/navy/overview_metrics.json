@@ -1,0 +1,8 @@
+{
+  "module": "dashboard",
+  "branch": "navy",
+  "key": "overview_metrics",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

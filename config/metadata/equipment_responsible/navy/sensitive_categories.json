@@ -1,0 +1,8 @@
+{
+  "module": "equipment_responsible",
+  "branch": "navy",
+  "key": "sensitive_categories",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}

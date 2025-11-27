@@ -1,0 +1,8 @@
+{
+  "module": "appointments",
+  "branch": "navy",
+  "key": "states",
+  "description": "Phase 1 placeholder metadata file. Populate in later configuration steps.",
+  "version": 1,
+  "items": []
+}
