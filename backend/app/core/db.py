@@ -1,20 +1,61 @@
-"""Database placeholder.
+from __future__ import annotations
 
-Phase 1 skeleton intentionally does NOT implement any database connection.
-This module exposes stub functions/types so other modules can import them
-without failing, to be replaced with real infrastructure later.
-"""
+from typing import Generator
 
-from typing import Any
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
-
-class SessionPlaceholder:
-    """Non-functional stand‑in for a DB session object."""
-
-    def __getattr__(self, name: str) -> Any:  # pragma: no cover - placeholder
-        raise RuntimeError("Database layer not implemented in Phase 1 skeleton")
+from .settings import get_settings
 
 
-def get_db() -> SessionPlaceholder:
-    """Dependency stub for future DB session injection."""
-    return SessionPlaceholder()
+# ------------------------------------------------------------------
+# LOAD SETTINGS
+# ------------------------------------------------------------------
+settings = get_settings()
+DATABASE_URL = settings.database_url
+
+
+# ------------------------------------------------------------------
+# DATABASE ENGINE (SQLite for Phase 1)
+# ------------------------------------------------------------------
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False}
+    if DATABASE_URL.startswith("sqlite")
+    else {},
+    echo=False,
+    future=True,
+)
+
+
+# ------------------------------------------------------------------
+# SESSION LOCAL
+# ------------------------------------------------------------------
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+    expire_on_commit=False,
+    class_=Session,
+)
+
+
+# ------------------------------------------------------------------
+# BASE CLASS FOR MODELS
+# ------------------------------------------------------------------
+Base = declarative_base()
+
+
+# ------------------------------------------------------------------
+# FASTAPI DEPENDENCY: DB SESSION
+# ------------------------------------------------------------------
+def get_db() -> Generator[Session, None, None]:
+    """
+    Provides a SQLAlchemy Session to request handlers.
+    Always closes after use.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
