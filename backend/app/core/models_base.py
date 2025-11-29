@@ -1,82 +1,61 @@
-# app/core/models_base.py
+from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Boolean, Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import declared_attr
 from enum import Enum
-from .db import Base
 
-# ================================================================
-# ENUM DEFINITIONS
-# ================================================================
+from sqlalchemy import DateTime, Boolean, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.core.db import Base
+
+
+class BaseModel(Base):
+    __abstract__ = True
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
+    )
+
+    is_deleted: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+
 class Branch(str, Enum):
-    ARMY = "Army"
-    MARINES = "Marines"
-    NAVY = "Navy"
-    AIR_FORCE = "AirForce"
-    SPACE_FORCE = "SpaceForce"
-    COAST_GUARD = "CoastGuard"
+    Army = "Army"
+    Marines = "Marines"
+    Navy = "Navy"
+    AirForce = "AirForce"
+    SpaceForce = "SpaceForce"
+    CoastGuard = "CoastGuard"
 
 
 class Component(str, Enum):
-    ACTIVE = "Active"
-    RESERVE = "Reserve"
-    GUARD = "Guard"
-    OTHER = "Other"
+    Active = "Active"
+    Reserve = "Reserve"
+    NationalGuard = "NationalGuard"
+    AirNationalGuard = "AirNationalGuard"
 
 
 class Role(str, Enum):
-    OWNER_DEVELOPER_ADMIN = "OwnerDeveloperAdmin"
-    SUPPORT_ADMIN = "SupportAdmin"
-    UNIT_ADMIN = "UnitAdmin"
-    STANDARD_USER = "StandardUser"
-
-
-# ================================================================
-# BASE MODEL MIXIN
-# ================================================================
-class BaseModelMixin:
-    """Shared fields for all models."""
-
-    id = Column(
-        PG_UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4
-    )
-
-    created_at = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow
-    )
-
-    updated_at = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow
-    )
-
-    is_deleted = Column(
-        Boolean,
-        nullable=False,
-        default=False
-    )
-
-    @declared_attr.directive
-    def __tablename__(cls) -> str:
-        return cls.__name__.lower()
-
-
-# ================================================================
-# BASE CLASS FOR ALL MODELS
-# ================================================================
-class BaseModel(Base, BaseModelMixin):
-    """
-    All models inherit from BaseModel.
-    Mixin handles common columns.
-    """
-    __abstract__ = True
-
+    OwnerDeveloperAdmin = "OwnerDeveloperAdmin"
+    SupportAdmin = "SupportAdmin"
+    UnitAdmin = "UnitAdmin"
+    StandardUser = "StandardUser"

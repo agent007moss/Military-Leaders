@@ -1,9 +1,30 @@
-"""Placeholder data models for the family module. Field sets will be defined in later phases."""
+# app/modules/family/models.py
 
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from __future__ import annotations
 
-class FamilyModel(BaseModel):
-    """Skeleton model. Replace `data` with real fields later."""
-    id: str = Field(..., description="Stable identifier")
-    data: Dict[str, Any] = Field(default_factory=dict, description="Placeholder field bag")
+import uuid
+from typing import Optional
+
+from sqlalchemy import String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.core.models_base import BaseModel
+
+class FamilyMember(BaseModel):
+    """Basic family member record linked to a service member."""
+
+    __tablename__ = "family_members"
+
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    relationship_type: Mapped[Optional[str]] = mapped_column(String(50))
+    first_name: Mapped[Optional[str]] = mapped_column(String(100))
+    last_name: Mapped[Optional[str]] = mapped_column(String(100))
+    phone: Mapped[Optional[str]] = mapped_column(String(32))
+    notes: Mapped[Optional[str]] = mapped_column(String(500))
+
+    service_member = relationship("ServiceMember", backref="family_members")

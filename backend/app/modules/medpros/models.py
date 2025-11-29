@@ -1,9 +1,30 @@
-"""Placeholder data models for the medpros module. Field sets will be defined in later phases."""
+# app/modules/medpros/models.py
 
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from __future__ import annotations
 
-class MedprosModel(BaseModel):
-    """Skeleton model. Replace `data` with real fields later."""
-    id: str = Field(..., description="Stable identifier")
-    data: Dict[str, Any] = Field(default_factory=dict, description="Placeholder field bag")
+import uuid
+from datetime import date
+from typing import Optional
+
+from sqlalchemy import String, Date, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.core.models_base import BaseModel
+
+class MedprosStatus(BaseModel):
+    """Minimal MEDPROS-style readiness snapshot."""
+
+    __tablename__ = "medpros_status"
+
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    pha_date: Mapped[Optional[date]] = mapped_column(Date)
+    dental_class: Mapped[Optional[str]] = mapped_column(String(10))
+    mrc: Mapped[Optional[str]] = mapped_column(String(10))
+    notes: Mapped[Optional[str]] = mapped_column(String(500))
+
+    service_member = relationship("ServiceMember", backref="medpros_entries")

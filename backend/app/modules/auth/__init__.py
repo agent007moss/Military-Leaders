@@ -1,18 +1,5 @@
-# app/modules/auth/__init__.py
-
-from .models import (
-    UserAccount,
-    Unit,
-    UnitMembership,
-)
+from .models import UserAccount
 from .api import get_router
 from . import schemas
 
-__all__ = [
-    "UserAccount",
-    "Unit",
-    "UnitMembership",
-    "get_router",
-    "schemas",
-]
-
+__all__ = ["UserAccount", "get_router", "schemas"]

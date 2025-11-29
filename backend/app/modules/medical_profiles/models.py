@@ -1,9 +1,31 @@
-"""Placeholder data models for the medical_profiles module. Field sets will be defined in later phases."""
+# app/modules/medical_profiles/models.py
 
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from __future__ import annotations
 
-class MedicalProfilesModel(BaseModel):
-    """Skeleton model. Replace `data` with real fields later."""
-    id: str = Field(..., description="Stable identifier")
-    data: Dict[str, Any] = Field(default_factory=dict, description="Placeholder field bag")
+import uuid
+from datetime import date
+from typing import Optional
+
+from sqlalchemy import String, Date, Boolean, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.core.models_base import BaseModel
+
+class MedicalProfile(BaseModel):
+    """Basic temporary/permanent medical profile record."""
+
+    __tablename__ = "medical_profiles"
+
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    profile_type: Mapped[Optional[str]] = mapped_column(String(50))
+    start_date: Mapped[Optional[date]] = mapped_column(Date)
+    end_date: Mapped[Optional[date]] = mapped_column(Date)
+    permanent: Mapped[bool] = mapped_column(Boolean, default=False)
+    notes: Mapped[Optional[str]] = mapped_column(String(500))
+
+    service_member = relationship("ServiceMember", backref="medical_profiles")

@@ -1,9 +1,31 @@
-"""Placeholder data models for the weapons module. Field sets will be defined in later phases."""
+# app/modules/weapons/models.py
 
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from __future__ import annotations
 
-class WeaponsModel(BaseModel):
-    """Skeleton model. Replace `data` with real fields later."""
-    id: str = Field(..., description="Stable identifier")
-    data: Dict[str, Any] = Field(default_factory=dict, description="Placeholder field bag")
+import uuid
+from datetime import date
+from typing import Optional
+
+from sqlalchemy import String, Date, Boolean, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.core.models_base import BaseModel
+
+class WeaponQualification(BaseModel):
+    """Minimal weapons qualification record."""
+
+    __tablename__ = "weapon_qualifications"
+
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    weapon_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    qual_date: Mapped[Optional[date]] = mapped_column(Date)
+    expiration_date: Mapped[Optional[date]] = mapped_column(Date)
+    passed: Mapped[bool] = mapped_column(Boolean, default=True)
+    score: Mapped[Optional[str]] = mapped_column(String(50))
+
+    service_member = relationship("ServiceMember", backref="weapon_qualifications")

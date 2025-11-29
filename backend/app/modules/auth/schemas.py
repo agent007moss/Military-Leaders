@@ -1,20 +1,24 @@
-"""API schema placeholders for `auth`.
+from __future__ import annotations
 
-Define request/response DTOs here in later implementation phases.
-"""
+from typing import Optional
+from uuid import UUID
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any
-
-
-class AuthCreate(BaseModel):
-    """Minimal create schema placeholder."""
-
-    data: Dict[str, Any] = Field(default_factory=dict)
+from pydantic import BaseModel, EmailStr
+from app.core.models_base import Role
 
 
-class AuthRead(BaseModel):
-    """Minimal read schema placeholder."""
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
 
-    id: str
-    data: Dict[str, Any]
+
+class UserRead(BaseModel):
+    id: UUID
+    username: str
+    email: EmailStr
+    role: Role
+    display_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
