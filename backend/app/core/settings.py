@@ -1,18 +1,29 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+# app/core/settings.py
+
+from __future__ import annotations
+
+from functools import lru_cache
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    # Environment
     environment: str = "development"
+
+    # Database
     database_url: str = "sqlite:///./mlt.db"
 
-    model_config = SettingsConfigDict(env_prefix="MLT_", env_file=".env", extra="ignore")
+    # JWT / Auth
+    jwt_secret_key: str = "CHANGE_ME_SUPER_SECRET_KEY"
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expires_minutes: int = 15
+    jwt_refresh_token_expires_days: int = 7
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
 
-_settings: Settings | None = None
-
-
+@lru_cache
 def get_settings() -> Settings:
-    global _settings
-    if _settings is None:
-        _settings = Settings()
-    return _settings
+    return Settings()
