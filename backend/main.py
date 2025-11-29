@@ -1,8 +1,11 @@
+# main.py
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.router import include_all_routers
 from app.core.settings import get_settings
+from app.core.db import init_models   # <<< REQUIRED
 
 
 def create_app() -> FastAPI:
@@ -14,6 +17,10 @@ def create_app() -> FastAPI:
         description="Fresh minimal backend skeleton (SQLite, FastAPI, SQLAlchemy 2.x).",
     )
 
+    # Create database tables BEFORE routers load
+    init_models()  # <<< REQUIRED
+
+    # CORS
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -22,6 +29,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Load module routers AFTER tables exist
     include_all_routers(app)
 
     @app.get("/health", tags=["system"])

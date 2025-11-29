@@ -1,5 +1,4 @@
-from .models import UserAccount
 from .api import get_router
-from . import schemas
+from . import models, schemas
 
-__all__ = ["UserAccount", "get_router", "schemas"]
+__all__ = ["get_router", "models", "schemas"]
