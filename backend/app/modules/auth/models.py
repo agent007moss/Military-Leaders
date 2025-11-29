@@ -1,9 +1,11 @@
+# app/modules/auth/models.py
+
 from __future__ import annotations
+import uuid
+from datetime import datetime
 
-from typing import Optional
-
-from sqlalchemy import String, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String
 
 from app.core.models_base import BaseModel, Role
 
@@ -11,14 +13,14 @@ from app.core.models_base import BaseModel, Role
 class UserAccount(BaseModel):
     __tablename__ = "user_accounts"
 
-    username: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    role: Mapped[Role] = mapped_column(
-        SAEnum(Role, name="role_enum"),
+    # store ENUM as pure string
+    role: Mapped[str] = mapped_column(
+        String(50),
+        default=Role.StandardUser.value,     # must use string value
         nullable=False,
-        default=Role.StandardUser,
     )
-
-    display_name: Mapped[Optional[str]] = mapped_column(String(255))

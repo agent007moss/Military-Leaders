@@ -1,31 +1,18 @@
-from __future__ import annotations
+# app/core/db.py
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-from app.core.settings import get_settings
-
-
-settings = get_settings()
-
-
-class Base(DeclarativeBase):
-    """SQLAlchemy declarative base for all models."""
-    pass
-
+DATABASE_URL = "sqlite:///./mlt.db"
 
 engine = create_engine(
-    settings.database_url,
-    echo=False,
-    future=True,
+    DATABASE_URL,
+    connect_args={"check_same_thread": False},
 )
 
-SessionLocal = sessionmaker(
-    bind=engine,
-    autoflush=False,
-    autocommit=False,
-    expire_on_commit=False,
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
 
 
 def get_db():
@@ -34,3 +21,16 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def init_models():
+    """
+    Import ALL models that must exist in Phase 1 BEFORE creating tables.
+    Only add new models as new modules go online.
+    """
+    from app.modules.auth.models import UserAccount
+    from app.modules.soldier_profile.models import ServiceMember
+    # Add additional Phase-1 models here as modules come online.
+
+    # Create tables
+    Base.metadata.create_all(bind=engine)

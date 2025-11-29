@@ -1,8 +1,7 @@
+# app/modules/auth/schemas.py
+
 from __future__ import annotations
-
-from typing import Optional
 from uuid import UUID
-
 from pydantic import BaseModel, EmailStr
 from app.core.models_base import Role
 
@@ -17,8 +16,8 @@ class UserRead(BaseModel):
     id: UUID
     username: str
     email: EmailStr
-    role: Role
-    display_name: Optional[str] = None
+    role: Role   # will return Enum automatically
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
