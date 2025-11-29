@@ -1,3 +1,11 @@
-"""Phase 1 placeholder package for `training` module."""
+# app/modules/training/router.py
 
-from .api import get_router
+from fastapi import APIRouter
+
+def get_router() -> APIRouter:
+    """
+    Phase 1 stub router for Training module.
+    No endpoints are defined until Phase B.
+    """
+    router = APIRouter(prefix="/training", tags=["training"])
+    return router
