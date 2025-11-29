@@ -13,9 +13,10 @@ from .schemas import ServiceMemberCreate, ServiceMemberRead
 
 def get_router() -> APIRouter:
     router = APIRouter(
-        prefix="/service-members",
-        tags=["service_members"],
+    	prefix="/api/soldier-profile",
+    	tags=["service_members"],
     )
+
 
     @router.get("/", response_model=List[ServiceMemberRead])
     def list_service_members(db: Session = Depends(get_db)):

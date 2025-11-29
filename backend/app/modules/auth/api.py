@@ -1,12 +1,28 @@
 # app/modules/auth/api.py
 
-from fastapi import APIRouter, Depends, HTTPException
+from __future__ import annotations
+
+from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.core.security import hash_password
-from .schemas import UserCreate, UserRead
+from app.core.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+)
 from .models import UserAccount
+from .schemas import (
+    UserCreate,
+    UserRead,
+    LoginRequest,
+    RefreshRequest,
+    TokenPair,
+)
+from .dependencies import get_current_user
 
 router = APIRouter(
     prefix="/api/auth",
@@ -14,20 +30,28 @@ router = APIRouter(
 )
 
 
+# ---------------------------
+# Create user (registration)
+# ---------------------------
 @router.post("/users", response_model=UserRead)
-def create_user(data: UserCreate, db: Session = Depends(get_db)):
-    # check unique email or username
-    existing = db.query(UserAccount).filter(
-        (UserAccount.username == data.username.lower()) |
-        (UserAccount.email == data.email.lower())
-    ).first()
+def create_user(data: UserCreate, db: Session = Depends(get_db)) -> UserRead:
+    username = data.username.lower()
+    email = data.email.lower()
 
+    existing = (
+        db.query(UserAccount)
+        .filter(
+            (UserAccount.username == username)
+            | (UserAccount.email == email)
+        )
+        .first()
+    )
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
     new_user = UserAccount(
-        username=data.username.lower(),
-        email=data.email.lower(),
+        username=username,
+        email=email,
         password_hash=hash_password(data.password),
     )
 
@@ -37,9 +61,98 @@ def create_user(data: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.get("/users", response_model=list[UserRead])
-def list_users(db: Session = Depends(get_db)):
+# ---------------------------
+# List users (temporary, open)
+# You can later secure it with get_current_user + role check.
+# ---------------------------
+@router.get("/users", response_model=List[UserRead])
+def list_users(db: Session = Depends(get_db)) -> List[UserRead]:
     return db.query(UserAccount).all()
+
+
+# ---------------------------
+# Login -> access + refresh tokens
+# ---------------------------
+@router.post("/login", response_model=TokenPair)
+def login(data: LoginRequest, db: Session = Depends(get_db)) -> TokenPair:
+    identifier = data.username_or_email.lower()
+
+    user = (
+        db.query(UserAccount)
+        .filter(
+            (UserAccount.username == identifier)
+            | (UserAccount.email == identifier)
+        )
+        .first()
+    )
+
+    if not user or not verify_password(data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+        )
+
+    access_token = create_access_token(str(user.id))
+    refresh_token = create_refresh_token(str(user.id))
+
+    return TokenPair(
+        access_token=access_token,
+        refresh_token=refresh_token,
+    )
+
+
+# ---------------------------
+# Refresh tokens
+# ---------------------------
+from jose import JWTError  # keep local to avoid circular imports
+from app.core.security import decode_token  # reused here
+
+
+@router.post("/refresh", response_model=TokenPair)
+def refresh_tokens(data: RefreshRequest, db: Session = Depends(get_db)) -> TokenPair:
+    try:
+        payload = decode_token(data.refresh_token)
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+        )
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type",
+        )
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+        )
+
+    user = db.query(UserAccount).filter(UserAccount.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    access_token = create_access_token(str(user.id))
+    refresh_token = create_refresh_token(str(user.id))
+
+    return TokenPair(
+        access_token=access_token,
+        refresh_token=refresh_token,
+    )
+
+
+# ---------------------------
+# Get current user (/me)
+# ---------------------------
+@router.get("/me", response_model=UserRead)
+def read_current_user(current_user: UserAccount = Depends(get_current_user)) -> UserRead:
+    return current_user
 
 
 def get_router():
