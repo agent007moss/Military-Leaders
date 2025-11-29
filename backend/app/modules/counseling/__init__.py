@@ -1,5 +1,3 @@
-# app/modules/counseling/__init__.py
-
 """
 Counseling Module (Phase A)
 
