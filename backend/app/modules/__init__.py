@@ -1,6 +1,7 @@
 # app/modules/__init__.py
 
 from . import auth
+from . import service_member_info
 from . import soldier_profile
 from . import dashboard
 from . import appointments
@@ -52,4 +53,5 @@ MODULES = [
     rating_scheme,
     licenses,
     military_info,
+    service_member_info,
 ]

@@ -11,32 +11,26 @@ from sqlalchemy import (
     Enum as SAEnum,
     ForeignKey,
     Integer,
+    Boolean,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
 
-from app.core.db import Base
-from app.core.models_base import BaseModelMixin, Branch, Component
+from app.core.models_base import BaseModel, Branch, Component
 
 
-# ---------------------------------------------------------------------------
-# MASTER PERSONNEL RECORD — ADMINISTRATIVE DATA
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION A – ADMINISTRATIVE DATA
+# ============================================================
 
-class AdminData(BaseModelMixin, Base):
-    """
-    Section A: Administrative Data (branch-specific fields allowed).
-    """
+class AdminData(BaseModel):
     __tablename__ = "admin_data"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
 
-    # Universal
     last_name: Mapped[Optional[str]] = mapped_column(String(50))
     first_name: Mapped[Optional[str]] = mapped_column(String(50))
     middle_initial: Mapped[Optional[str]] = mapped_column(String(5))
@@ -46,12 +40,14 @@ class AdminData(BaseModelMixin, Base):
     ssn_last4: Mapped[Optional[str]] = mapped_column(String(4))
     dob: Mapped[Optional[date]] = mapped_column(Date)
     gender: Mapped[Optional[str]] = mapped_column(String(20))
+
     component: Mapped[Optional[Component]] = mapped_column(
         SAEnum(Component, name="component_enum")
     )
     branch: Mapped[Optional[Branch]] = mapped_column(
         SAEnum(Branch, name="branch_enum")
     )
+
     unit: Mapped[Optional[str]] = mapped_column(String(100))
     uic_ruc_pas_opfac: Mapped[Optional[str]] = mapped_column(String(20))
     duty_title: Mapped[Optional[str]] = mapped_column(String(200))
@@ -66,19 +62,15 @@ class AdminData(BaseModelMixin, Base):
     pmos_afsc_rate: Mapped[Optional[str]] = mapped_column(String(50))
 
 
-# ---------------------------------------------------------------------------
-# SERVICE DATA (TIS/TIG/PAY/STATUS)
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION B – SERVICE DATA
+# ============================================================
 
-class ServiceData(BaseModelMixin, Base):
-    """
-    Section B: Service Data.
-    """
+class ServiceData(BaseModel):
     __tablename__ = "service_data"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -87,27 +79,25 @@ class ServiceData(BaseModelMixin, Base):
     pebd: Mapped[Optional[date]] = mapped_column(Date)
     diems: Mapped[Optional[date]] = mapped_column(Date)
     ets_eas_eaos_dos: Mapped[Optional[date]] = mapped_column(Date)
+
     tis_years: Mapped[Optional[int]] = mapped_column(Integer)
     tig_years: Mapped[Optional[int]] = mapped_column(Integer)
+
     pay_grade: Mapped[Optional[str]] = mapped_column(String(5))
     promotion_eligibility: Mapped[Optional[str]] = mapped_column(String(200))
     flag_status: Mapped[Optional[str]] = mapped_column(String(200))
     component_status: Mapped[Optional[str]] = mapped_column(String(100))
 
 
-# ---------------------------------------------------------------------------
-# MILITARY EDUCATION
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION C1 – MILITARY EDUCATION
+# ============================================================
 
-class MilitaryEducation(BaseModelMixin, Base):
-    """
-    Section C1: Military Schools.
-    """
+class MilitaryEducation(BaseModel):
     __tablename__ = "military_education"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -115,20 +105,20 @@ class MilitaryEducation(BaseModelMixin, Base):
     course_name: Mapped[str] = mapped_column(String(200))
     start_date: Mapped[Optional[date]] = mapped_column(Date)
     end_date: Mapped[Optional[date]] = mapped_column(Date)
-    resident: Mapped[Optional[bool]] = mapped_column()
+    resident: Mapped[Optional[bool]] = mapped_column(Boolean)
     certificate_ref: Mapped[Optional[str]] = mapped_column(Text)
     notes: Mapped[Optional[str]] = mapped_column(Text)
 
 
-class CivilianEducation(BaseModelMixin, Base):
-    """
-    Section C2: Civilian Education.
-    """
+# ============================================================
+# SECTION C2 – CIVILIAN EDUCATION
+# ============================================================
+
+class CivilianEducation(BaseModel):
     __tablename__ = "civilian_education"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -140,19 +130,15 @@ class CivilianEducation(BaseModelMixin, Base):
     credits: Mapped[Optional[int]] = mapped_column(Integer)
 
 
-# ---------------------------------------------------------------------------
-# AWARDS SUMMARY
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION D – AWARDS SUMMARY
+# ============================================================
 
-class AwardSummary(BaseModelMixin, Base):
-    """
-    Section D: Awards & Decorations (summary mirror of Awards Box).
-    """
+class AwardSummary(BaseModel):
     __tablename__ = "award_summary"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -163,19 +149,15 @@ class AwardSummary(BaseModelMixin, Base):
     award_periods_ref: Mapped[Optional[str]] = mapped_column(Text)
 
 
-# ---------------------------------------------------------------------------
-# ASSIGNMENT HISTORY
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION E – ASSIGNMENT HISTORY
+# ============================================================
 
-class AssignmentHistory(BaseModelMixin, Base):
-    """
-    Section E: Assignment History.
-    """
+class AssignmentHistory(BaseModel):
     __tablename__ = "assignment_history"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -191,19 +173,15 @@ class AssignmentHistory(BaseModelMixin, Base):
     country: Mapped[Optional[str]] = mapped_column(String(100))
 
 
-# ---------------------------------------------------------------------------
-# SECURITY / DRIVER / WEAPONS / CBRN
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION F – SECURITY / DRIVER / WEAPONS / CBRN
+# ============================================================
 
-class SecurityDriverWeaponsCBRN(BaseModelMixin, Base):
-    """
-    Section F.
-    """
+class SecurityDriverWeaponsCBRN(BaseModel):
     __tablename__ = "security_driver_weapons_cbrn"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -217,26 +195,22 @@ class SecurityDriverWeaponsCBRN(BaseModelMixin, Base):
     civilian_license_exp: Mapped[Optional[date]] = mapped_column(Date)
     military_license: Mapped[Optional[str]] = mapped_column(String(50))
     vehicle_quals_ref: Mapped[Optional[str]] = mapped_column(Text)
-    nvg_qualification: Mapped[Optional[bool]] = mapped_column()
+    nvg_qualification: Mapped[Optional[bool]] = mapped_column(Boolean)
 
     # WEAPONS / CBRN
     weapons_summary_ref: Mapped[Optional[str]] = mapped_column(Text)
     cbrn_quals_ref: Mapped[Optional[str]] = mapped_column(Text)
 
 
-# ---------------------------------------------------------------------------
-# DEPLOYMENTS
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION G – DEPLOYMENTS
+# ============================================================
 
-class DeploymentRecord(BaseModelMixin, Base):
-    """
-    Section G: Deployments.
-    """
+class DeploymentRecord(BaseModel):
     __tablename__ = "deployment_records"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -244,25 +218,21 @@ class DeploymentRecord(BaseModelMixin, Base):
     country: Mapped[Optional[str]] = mapped_column(String(100))
     start_date: Mapped[Optional[date]] = mapped_column(Date)
     end_date: Mapped[Optional[date]] = mapped_column(Date)
-    combat_zone_pay: Mapped[Optional[bool]] = mapped_column()
+    combat_zone_pay: Mapped[Optional[bool]] = mapped_column(Boolean)
     campaign_credits: Mapped[Optional[str]] = mapped_column(Text)
     notes: Mapped[Optional[str]] = mapped_column(Text)
     dd214_ref: Mapped[Optional[str]] = mapped_column(Text)
 
 
-# ---------------------------------------------------------------------------
-# LANGUAGES
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION H – LANGUAGE RECORDS
+# ============================================================
 
-class LanguageRecord(BaseModelMixin, Base):
-    """
-    Section H: Languages.
-    """
+class LanguageRecord(BaseModel):
     __tablename__ = "language_records"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -272,25 +242,18 @@ class LanguageRecord(BaseModelMixin, Base):
     dlpt_reading: Mapped[Optional[int]] = mapped_column(Integer)
     dlpt_speaking: Mapped[Optional[int]] = mapped_column(Integer)
     dlpt_date: Mapped[Optional[date]] = mapped_column(Date)
-    proficiency_pay: Mapped[Optional[bool]] = mapped_column()
+    proficiency_pay: Mapped[Optional[bool]] = mapped_column(Boolean)
 
 
-# ---------------------------------------------------------------------------
-# MEDICAL READINESS SNAPSHOT (READ-ONLY MIRRORS)
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION I – MEDICAL READINESS SNAPSHOT (NO PHI)
+# ============================================================
 
-class MedicalReadinessSnapshot(BaseModelMixin, Base):
-    """
-    Section I: Mirror of MEDPROS, HR Metrics, Profiles, Fitness.
-
-    No medical details stored here (PHI protection):
-    - Only summary fields allowed.
-    """
+class MedicalReadinessSnapshot(BaseModel):
     __tablename__ = "medical_readiness_snapshot"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -305,19 +268,15 @@ class MedicalReadinessSnapshot(BaseModelMixin, Base):
     profile_type: Mapped[Optional[str]] = mapped_column(String(50))
 
 
-# ---------------------------------------------------------------------------
-# PERSONAL / FAMILY DATA
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION J – PERSONAL / FAMILY DATA
+# ============================================================
 
-class PersonalFamilyData(BaseModelMixin, Base):
-    """
-    Section J.
-    """
+class PersonalFamilyData(BaseModel):
     __tablename__ = "personal_family_data"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -329,22 +288,18 @@ class PersonalFamilyData(BaseModelMixin, Base):
     family_care_plan: Mapped[Optional[str]] = mapped_column(String(200))
     bah_bas_status: Mapped[Optional[str]] = mapped_column(String(50))
     home_of_record: Mapped[Optional[str]] = mapped_column(String(200))
-    spouse_military: Mapped[Optional[bool]] = mapped_column()
+    spouse_military: Mapped[Optional[bool]] = mapped_column(Boolean)
 
 
-# ---------------------------------------------------------------------------
-# ADDITIONAL SOLDIER DATA
-# ---------------------------------------------------------------------------
+# ============================================================
+# SECTION K – ADDITIONAL SOLDIER DATA
+# ============================================================
 
-class AdditionalSoldierData(BaseModelMixin, Base):
-    """
-    Section K.
-    """
+class AdditionalSoldierData(BaseModel):
     __tablename__ = "additional_soldier_data"
 
-    soldier_id: Mapped[uuid.UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
