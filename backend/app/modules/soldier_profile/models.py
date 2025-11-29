@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import (
     String,
@@ -27,6 +27,9 @@ from app.core.models_base import (
     Component,
 )
 
+# Import PERSTATS entry for relationship mapping
+from app.modules.perstats.models import PerstatsEntry
+
 
 # ---------------------------------------------------------------------------
 # SERVICE MEMBER (TOP-LEVEL PROFILE)
@@ -34,8 +37,8 @@ from app.core.models_base import (
 
 class ServiceMember(BaseModel):
     """
-    Central profile table. One row per Soldier/Marine/Airman/Guardian/Sailor/Coastie.
-    All Phase 1 modules attach via service_member_id.
+    Central profile table. One row per Soldier/Marine/Airman/Guardian/
+    Sailor/Coastie. All Phase 1 modules attach via service_member_id.
     """
 
     __tablename__ = "service_members"
@@ -59,7 +62,8 @@ class ServiceMember(BaseModel):
         nullable=True,
     )
 
-    # Relationships – separate tables for logical grouping
+    # SECTION RELATIONSHIPS ---------------------------------------------------
+
     admin_data: Mapped[Optional["ServiceMemberAdminData"]] = relationship(
         "ServiceMemberAdminData",
         back_populates="service_member",
@@ -85,6 +89,13 @@ class ServiceMember(BaseModel):
         "ServiceMemberStatusData",
         back_populates="service_member",
         uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+    # PERSTATS (multiple historical entries)
+    perstats_entries: Mapped[List["PerstatsEntry"]] = relationship(
+        "PerstatsEntry",
+        back_populates="service_member",
         cascade="all, delete-orphan",
     )
 
@@ -162,7 +173,7 @@ class ServiceMemberServiceData(BaseModel):
     ets_eas: Mapped[Optional[date]] = mapped_column(Date)
     dos_eaos: Mapped[Optional[date]] = mapped_column(Date)
 
-    # Derived values (computed in future phases)
+    # Derived values (future phases compute automatically)
     tis_years: Mapped[Optional[int]] = mapped_column(Integer)
     tig_years: Mapped[Optional[int]] = mapped_column(Integer)
 
@@ -206,7 +217,7 @@ class ServiceMemberContactData(BaseModel):
 
 class ServiceMemberStatusData(BaseModel):
     """
-    Current duty status required by PERSTATS and Dashboard specification.
+    Current duty status for PERSTATS & Dashboard systems.
     """
 
     __tablename__ = "service_member_status_data"
@@ -230,4 +241,3 @@ class ServiceMemberStatusData(BaseModel):
     service_member: Mapped[ServiceMember] = relationship(
         "ServiceMember", back_populates="status_data"
     )
-

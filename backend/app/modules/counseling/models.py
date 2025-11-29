@@ -1,5 +1,3 @@
-# app/modules/counseling/models.py
-
 from __future__ import annotations
 
 import uuid
@@ -61,7 +59,7 @@ class CounselingEntry(BaseModelMixin, Base):
 
     soldier_id: Mapped[uuid.UUID] = mapped_column(
         PGUUID(as_uuid=True),
-        ForeignKey("soldiers.id", ondelete="CASCADE"),
+        ForeignKey("soldier_profiles.id", ondelete="CASCADE"),
         index=True,
         nullable=False,
     )
@@ -102,3 +100,7 @@ class CounselingEntry(BaseModelMixin, Base):
 
     # Relationships
     counseling_type: Mapped[CounselingType] = relationship("CounselingType")
+    soldier: Mapped["SoldierProfile"] = relationship(
+        "SoldierProfile",
+        back_populates="counselings",
+    )
