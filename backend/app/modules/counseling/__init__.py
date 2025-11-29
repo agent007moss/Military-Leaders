@@ -1,33 +1,3 @@
-"""
-Counseling Module (Phase A)
+from .api import get_router
 
-Exports:
-- CounselingType
-- CounselingEntry
-
-Provides a Phase A router stub for integration with app/core/router.py.
-"""
-
-from .models import (
-    CounselingType,
-    CounselingEntry,
-)
-
-__all__ = [
-    "CounselingType",
-    "CounselingEntry",
-]
-
-
-def get_router():
-    """
-    Phase A stub router.
-    Actual endpoints added in API phase.
-    """
-    from fastapi import APIRouter
-
-    router = APIRouter(
-        prefix="/counseling",
-        tags=["counseling"],
-    )
-    return router
+__all__ = ["get_router"]

@@ -1,12 +1,14 @@
-# app/modules/soldier_profile/api.py
-"""
-API router scaffolding for `soldier_profile` module.
-Routes intentionally return placeholder static data.
-"""
+from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from typing import List
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from app.core.db import get_db
-from typing import Any, Dict
+from .models import ServiceMember
+from .schemas import ServiceMemberCreate, ServiceMemberRead
 
 
 def get_router() -> APIRouter:
@@ -15,36 +17,30 @@ def get_router() -> APIRouter:
         tags=["service_members"],
     )
 
-    @router.get("/")
-    async def list_service_members(db=Depends(get_db)) -> Dict[str, Any]:
-        """
-        Placeholder for list retrieval.
-        No DB queries yet.
-        """
-        return {"status": "ok", "items": []}
+    @router.get("/", response_model=List[ServiceMemberRead])
+    def list_service_members(db: Session = Depends(get_db)):
+        return db.query(ServiceMember).all()
 
-    @router.post("/")
-    async def create_service_member(db=Depends(get_db)) -> Dict[str, Any]:
-        """
-        Placeholder create.
-        """
-        return {
-            "status": "created",
-            "item": {
-                "id": "placeholder-id",
-                "message": "ServiceMember created (placeholder)",
-            },
-        }
+    @router.get("/{service_member_id}", response_model=ServiceMemberRead)
+    def get_service_member(service_member_id: UUID, db: Session = Depends(get_db)):
+        obj = db.query(ServiceMember).filter(ServiceMember.id == service_member_id).first()
+        if not obj:
+            raise HTTPException(status_code=404, detail="Service member not found")
+        return obj
 
-    @router.get("/example")
-    async def example_endpoint(db=Depends(get_db)) -> Dict[str, Any]:
-        """
-        Simple static response to verify router wiring.
-        """
-        return {
-            "module": "soldier_profile",
-            "example": True,
-            "detail": "Router OK",
-        }
+    @router.post("/", response_model=ServiceMemberRead)
+    def create_service_member(payload: ServiceMemberCreate, db: Session = Depends(get_db)):
+        obj = ServiceMember(
+            first_name=payload.first_name,
+            last_name=payload.last_name,
+            middle_initial=payload.middle_initial,
+            branch=payload.branch,
+            component=payload.component,
+            owner_user_id=payload.owner_user_id,
+        )
+        db.add(obj)
+        db.commit()
+        db.refresh(obj)
+        return obj
 
     return router

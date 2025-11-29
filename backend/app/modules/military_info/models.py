@@ -1,9 +1,27 @@
-"""Placeholder data models for the military_info module. Field sets will be defined in later phases."""
+# app/modules/military_info/models.py
 
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from __future__ import annotations
 
-class MilitaryInfoModel(BaseModel):
-    """Skeleton model. Replace `data` with real fields later."""
-    id: str = Field(..., description="Stable identifier")
-    data: Dict[str, Any] = Field(default_factory=dict, description="Placeholder field bag")
+import uuid
+from typing import Optional
+
+from sqlalchemy import String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.core.models_base import BaseModel
+
+class ServiceMemberMilitaryInfo(BaseModel):
+    """Aggregated branch-specific military info shell."""
+
+    __tablename__ = "service_member_military_info"
+
+    service_member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("service_members.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    branch_summary: Mapped[Optional[str]] = mapped_column(String(500))
+
+    service_member = relationship("ServiceMember", backref="military_info")
