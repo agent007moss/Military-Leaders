@@ -3,12 +3,15 @@
 """
 Military Info (Master Personnel Record) module.
 
-Provides a unified read-only API endpoint to fetch the complete
-"Military Info Box" / ERB-STP style bundle for a single service member.
+Ensures models are loaded for SQLAlchemy table registration,
+and exposes the API router factory.
 """
 
-from .api import get_router  # main FastAPI router factory
-from . import models  # ensure models are imported so tables are registered
+# Ensure models import so SQLAlchemy registers all tables
+from . import models
+
+# Expose get_router()
+from .api import get_router
 
 __all__ = [
     "get_router",
