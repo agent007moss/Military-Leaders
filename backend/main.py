@@ -1,11 +1,20 @@
 # main.py
 
+from __future__ import annotations
+
+# ---------------------------------------------------------
+# ABSOLUTELY FIRST: clear SQLAlchemy metadata BEFORE
+# any model imports (fixes "Table already defined" error)
+# ---------------------------------------------------------
+from app.core.db import Base, init_models, engine  # init_models imported early
+Base.metadata.clear()
+# ---------------------------------------------------------
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.router import include_all_routers
 from app.core.settings import get_settings
-from app.core.db import init_models   # <<< REQUIRED
 
 
 def create_app() -> FastAPI:
@@ -17,10 +26,13 @@ def create_app() -> FastAPI:
         description="Fresh minimal backend skeleton (SQLite, FastAPI, SQLAlchemy 2.x).",
     )
 
-    # Create database tables BEFORE routers load
-    init_models()  # <<< REQUIRED
+    # -----------------------------------------------------
+    # Create database tables AFTER metadata wipe
+    # but BEFORE loading module routers (VERY IMPORTANT)
+    # -----------------------------------------------------
+    init_models()
 
-    # CORS
+    # CORS (unchanged)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -29,7 +41,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Load module routers AFTER tables exist
+    # Routers load ONLY after tables exist
     include_all_routers(app)
 
     @app.get("/health", tags=["system"])
