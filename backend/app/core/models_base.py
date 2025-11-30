@@ -10,6 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
 
 
+# ============================================================
+# MAIN BASE MODEL (Used for user_accounts)
+# ============================================================
+
 class BaseModel(Base):
     __abstract__ = True
 
@@ -37,6 +41,43 @@ class BaseModel(Base):
         nullable=False,
     )
 
+
+# ============================================================
+# TABLE MIXIN FOR ALL MILITARY INFO SUBTABLES
+# ============================================================
+
+class BaseTableMixin(Base):
+    """
+    Simple mixin for ERB-style tables:
+    - id
+    - created_at
+    - updated_at
+    """
+
+    __abstract__ = True
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
+    )
+
+
+# ============================================================
+# ENUMS
+# ============================================================
 
 class Branch(str, Enum):
     Army = "Army"
