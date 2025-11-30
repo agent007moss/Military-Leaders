@@ -1,5 +1,3 @@
-# app/modules/auth/api.py
-
 from __future__ import annotations
 
 from typing import List
@@ -30,9 +28,9 @@ router = APIRouter(
 )
 
 
-# ---------------------------
-# Create user (registration)
-# ---------------------------
+# -------------------------------------------------
+# Create user (registration core function)
+# -------------------------------------------------
 @router.post("/users", response_model=UserRead)
 def create_user(data: UserCreate, db: Session = Depends(get_db)) -> UserRead:
     username = data.username.lower()
@@ -61,18 +59,25 @@ def create_user(data: UserCreate, db: Session = Depends(get_db)) -> UserRead:
     return new_user
 
 
-# ---------------------------
+# -------------------------------------------------
+# Register (clean endpoint)  <-- NEW
+# -------------------------------------------------
+@router.post("/register", response_model=UserRead)
+def register_user(data: UserCreate, db: Session = Depends(get_db)) -> UserRead:
+    return create_user(data, db)
+
+
+# -------------------------------------------------
 # List users (temporary, open)
-# You can later secure it with get_current_user + role check.
-# ---------------------------
+# -------------------------------------------------
 @router.get("/users", response_model=List[UserRead])
 def list_users(db: Session = Depends(get_db)) -> List[UserRead]:
     return db.query(UserAccount).all()
 
 
-# ---------------------------
+# -------------------------------------------------
 # Login -> access + refresh tokens
-# ---------------------------
+# -------------------------------------------------
 @router.post("/login", response_model=TokenPair)
 def login(data: LoginRequest, db: Session = Depends(get_db)) -> TokenPair:
     identifier = data.username_or_email.lower()
@@ -101,11 +106,11 @@ def login(data: LoginRequest, db: Session = Depends(get_db)) -> TokenPair:
     )
 
 
-# ---------------------------
+# -------------------------------------------------
 # Refresh tokens
-# ---------------------------
-from jose import JWTError  # keep local to avoid circular imports
-from app.core.security import decode_token  # reused here
+# -------------------------------------------------
+from jose import JWTError
+from app.core.security import decode_token
 
 
 @router.post("/refresh", response_model=TokenPair)
@@ -147,9 +152,9 @@ def refresh_tokens(data: RefreshRequest, db: Session = Depends(get_db)) -> Token
     )
 
 
-# ---------------------------
+# -------------------------------------------------
 # Get current user (/me)
-# ---------------------------
+# -------------------------------------------------
 @router.get("/me", response_model=UserRead)
 def read_current_user(current_user: UserAccount = Depends(get_current_user)) -> UserRead:
     return current_user

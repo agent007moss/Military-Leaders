@@ -4,13 +4,45 @@ from datetime import date
 from uuid import UUID
 from typing import Optional, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
 from app.core.models_base import Branch, Component
 
 
 # ---------------------------------------------------------------------------
 # SECTION SCHEMAS
 # ---------------------------------------------------------------------------
+
+class AdminDataCreate(BaseModel):
+    """
+    Payload used to CREATE/UPDATE AdminData for a soldier.
+    """
+    soldier_id: UUID
+
+    last_name: Optional[str] = None
+    first_name: Optional[str] = None
+    middle_initial: Optional[str] = None
+    rank: Optional[str] = None
+    grade: Optional[str] = None
+    dodid: Optional[str] = None
+    ssn_last4: Optional[str] = None
+    dob: Optional[date] = None
+    gender: Optional[str] = None
+    component: Optional[Component] = None
+    branch: Optional[Branch] = None
+    unit: Optional[str] = None
+    uic_ruc_pas_opfac: Optional[str] = None
+    duty_title: Optional[str] = None
+    duty_location: Optional[str] = None
+    security_clearance: Optional[str] = None
+    clearance_date: Optional[date] = None
+    marital_status: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    email_mil: Optional[str] = None
+    email_civ: Optional[str] = None
+    pmos_afsc_rate: Optional[str] = None
+
 
 class AdminDataRead(BaseModel):
     id: UUID
@@ -238,12 +270,12 @@ class MilitaryInfoBundle(BaseModel):
     admin_data: Optional[AdminDataRead] = None
     service_data: Optional[ServiceDataRead] = None
 
-    military_education: List[MilitaryEducationRead] = Field(default_factory=list)
-    civilian_education: List[CivilianEducationRead] = Field(default_factory=list)
-    awards: List[AwardSummaryRead] = Field(default_factory=list)
-    assignments: List[AssignmentHistoryRead] = Field(default_factory=list)
-    deployments: List[DeploymentRecordRead] = Field(default_factory=list)
-    languages: List[LanguageRecordRead] = Field(default_factory=list)
+    military_education: List[MilitaryEducationRead] = []
+    civilian_education: List[CivilianEducationRead] = []
+    awards: List[AwardSummaryRead] = []
+    assignments: List[AssignmentHistoryRead] = []
+    deployments: List[DeploymentRecordRead] = []
+    languages: List[LanguageRecordRead] = []
 
     security_driver_weapons_cbrn: Optional[SecurityDriverWeaponsCBRNRead] = None
     medical_readiness: Optional[MedicalReadinessSnapshotRead] = None

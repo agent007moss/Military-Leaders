@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
+from uuid import UUID
 
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -73,10 +74,6 @@ def create_refresh_token(subject: str, extra_claims: Optional[Dict[str, Any]] = 
 
 
 def decode_token(token: str) -> Dict[str, Any]:
-    """
-    Decode a JWT and return its payload.
-    Raises jose.JWTError on invalid/expired token.
-    """
     settings = get_settings()
     return jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
 
@@ -92,7 +89,6 @@ def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ) -> UserAccount:
-    """Extract user from JWT access token."""
     unauthorized = HTTPException(status_code=401, detail="Invalid or expired token")
 
     try:
@@ -103,10 +99,21 @@ def get_current_user(
     if payload.get("type") != "access":
         raise unauthorized
 
-    user_id = payload.get("sub")
-    if not user_id:
+    raw_sub = payload.get("sub")
+    if not raw_sub:
         raise unauthorized
 
+    # -----------------------
+    # CRITICAL UUID FIX
+    # -----------------------
+    try:
+        user_id = UUID(raw_sub)
+    except Exception:
+        raise unauthorized
+
+    # -----------------------
+    # FETCH USER
+    # -----------------------
     user = db.query(UserAccount).filter(UserAccount.id == user_id).first()
     if not user:
         raise unauthorized
